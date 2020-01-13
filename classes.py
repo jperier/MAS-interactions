@@ -1,10 +1,11 @@
 from threading import Thread, RLock
+from time import sleep
 
 
 class Grid:
     def __init__(self, n, verbose=False):
         self.n = n
-        self.grid = [[None]*n]*n
+        self.grid = [[None for i in range(n)] for j in range(n)]
         self.lock = RLock()
         self.verbose = verbose
         if verbose:
@@ -20,7 +21,7 @@ class Grid:
         :param dest: destination position
         :return: bool (True if done)
         """
-        if self.is_valid_cell(dest) and not self.is_empty(dest) \
+        if self.is_valid_cell(dest) and self.is_empty(dest) \
                 and (abs(source[0]-dest[0]) + abs(source[1]-dest[1])) <= 1:
             print('Invalid move', source, dest)
             return False
@@ -35,7 +36,7 @@ class Grid:
 
     def add(self, agent):
         pos = agent.pos
-        if self.is_valid_cell(pos) and not self.is_empty(pos):
+        if not self.is_valid_cell(pos) or not self.is_empty(pos):
             print('Invalid position', agent.pos, 'for agent', agent.pos)
             return False
 
@@ -45,11 +46,23 @@ class Grid:
     def get(self, pos):
         return self.grid[pos[0]][pos[1]]
 
-    def set(self, pos, val):
-        self.grid[pos[0]][pos[1]] = val
+    def set(self, pos, a):
+        self.grid[pos[0]][pos[1]] = a
 
     def is_valid_cell(self, pos):
         return pos[0]<self.n and pos[1]<self.n
+
+    def __str__(self):
+        s = []
+        for row in self.grid:
+            for cell in row:
+                if cell is None:
+                    s.append('.')
+                else:
+                    s.append(str(cell.id))
+                s.append('\t')
+            s.append('\n')
+        return ''.join(s)
 
 
 class Agent(Thread):
@@ -64,21 +77,41 @@ class Agent(Thread):
 
     def run(self):
         while not self.stop:
-            if self.pos != self.goal:
+            if self.has_reached_goal():
+                sleep(1)
+            else:
+                # Trying both axis
                 for axis in range(2):
                     if self.pos[axis]-self.goal[axis] != 0:
                         stuck = not self.try_moving(axis=axis)
 
+                        # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
     def try_moving(self, axis):
+        # Chosing direction
         if self.pos[axis]-self.goal[axis] > 0:
             direction = -1
         else:
             direction = 1
 
+        # Calculating destination
         if axis == 0:
             dest = (self.pos[0]+direction, self.pos[1])
         else:
             dest = (self.pos[0], self.pos[1]+direction)
 
+        # Trying to move
         with self.grid.lock:
             return self.grid.move(self.pos, dest)
+
+    def has_reached_goal(self):
+        return self.pos == self.goal
+
+
+g = Grid(5)
+a1 = Agent(0, (0, 0), (1, 1), g)
+a2 = Agent(1, (2, 2), (2, 1), g)
+g.add(a1)
+g.add(a2)
+
+print(g)
