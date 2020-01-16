@@ -2,11 +2,14 @@ import sys
 
 from classes import Agent, Grid
 from random import randint
+from time import sleep
 
 
 N_GRID = 5
-N_AGENTS = 1
+N_AGENTS = 3
 VERBOSE = True
+MAX_ITER = 60
+REFRESH_TIME = 0.5
 
 
 def sprint(s, end='\n'):
@@ -19,7 +22,7 @@ def rand_pos(domain):
 
 
 if __name__ == '__main__':
-    assert N_AGENTS < N_GRID
+    assert N_AGENTS < N_GRID**2
 
     # Creating grid
     grid = Grid(N_GRID, verbose=VERBOSE)
@@ -42,13 +45,27 @@ if __name__ == '__main__':
             if VERBOSE:
                 print('Agent', i, 'crée à la position', pos, 'avec objectif', goal)
 
+    print(grid)
+
     # Starting agents
     for a in agents:
         a.start()
 
-    # TODO: Observer/Observable
-    # https://stackoverflow.com/questions/13528213/observer-observable-classes-in-python
-    # https://stackoverflow.com/questions/1904351/python-observer-pattern-examples-tips (plutot celle ci a priori)
+    # Looping until agents are done or MAX_ITER is reached
+    nb_completed_goal = 0
+    i = 0
+    while nb_completed_goal < N_AGENTS and i <= MAX_ITER:
+
+        sleep(REFRESH_TIME)
+
+        nb_completed_goal = 0
+        for a in agents:
+            if a.has_reached_goal():
+                nb_completed_goal += 1
+
+        # with grid.lock:
+        #     print(grid)
+        i += 1
 
     # Finishing agents
     for a in agents:
