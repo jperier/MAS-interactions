@@ -1,20 +1,16 @@
 import sys
 
-from classes import Agent, Grid
+from agent import Agent
+from grid import Grid
 from random import randint
 from time import sleep
 
 
 N_GRID = 5
-N_AGENTS = 3
+N_AGENTS = 5
 VERBOSE = True
-MAX_ITER = 60
+MAX_ITER = 30
 REFRESH_TIME = 0.5
-
-
-def sprint(s, end='\n'):
-    sys.stdout.write(str(s)+end)
-    sys.stdout.flush()
 
 
 def rand_pos(domain):
