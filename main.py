@@ -1,5 +1,6 @@
 import sys
 
+from mailbox import MailBox
 from agent import Agent
 from grid import Grid
 from random import randint
@@ -7,10 +8,10 @@ from time import sleep
 
 
 N_GRID = 5
-N_AGENTS = 5
+N_AGENTS = 7
 VERBOSE = True
-MAX_ITER = 30
-REFRESH_TIME = 0.5
+MAX_ITER = 300
+REFRESH_TIME = 0.1
 
 
 def rand_pos(domain):
@@ -20,8 +21,8 @@ def rand_pos(domain):
 if __name__ == '__main__':
     assert N_AGENTS < N_GRID**2
 
-    # Creating grid
     grid = Grid(N_GRID, verbose=VERBOSE)
+    mailbox = MailBox()
 
     # Creating agents
     agents = []
@@ -34,7 +35,7 @@ if __name__ == '__main__':
             pos = rand_pos(domain)
             goal = rand_pos(domain)
 
-        agent = Agent(i, pos, goal, grid)
+        agent = Agent(i, pos, goal, grid, mailbox)
         if grid.add(agent):
             agents.append(agent)
             goals.append(goal)
